@@ -123,7 +123,7 @@ assignment:
     | objectClassAssignment
     | objectAssignment
     | objectSetAssignment
-//  | parameterizedAssignment
+    | parameterizedAssignment
 ;
 
 
@@ -530,6 +530,20 @@ configComments:
     CONFIG_COMMENT CONFIG_COMMENT*
 ;
 
+/*--------------------- Table Constraints -------------------------------------------*/
+//  See ITU-T X.682 (02/2021), Constraint Specification
+
+tableConstraint:
+    simpleTableConstraint
+    | componentRelationConstraint
+;
+
+simpleTableConstraint:
+    objectSet
+;
+
+
+
 /*--------------------- Object Classes ----------------------------------------------*/
 
 definedObjectClass:
@@ -793,9 +807,9 @@ informationFromObjects:
 
 referencedObjects:
     definedObject
-//    | parameterizedObject
+    | parameterizedObject
     | definedObjectSet
-//    | parameterizedObjectSet
+    | parameterizedObjectSet
 ;
 
 instanceOfType:
@@ -807,7 +821,67 @@ instanceOfType:
 //;
 
 
+/*----------------------- Parameterization -------------------------------------------*/
+// See ITU-T X.693 (02/2021) Paramaterization of ASN.1 specifications
 
+parameterizedAssignment:
+    parameterizedTypeAssignment
+    | parameterizedValueAssignment
+    | parameterizedObjectClassAssignment
+    | parameterizedObjectAssignment
+    | parameterizedObjectSetAssignment
+;
+
+parameterizedTypeAssignment:
+    UCASE_ID parameterList ASSIGN type
+;
+
+parameterizedValueAssignment:
+    LCASE_ID parameterList type ASSIGN value
+;
+
+parameterizedValueSetTypeAssignment:
+    UCASE_ID parameterList type ASSIGN valueSet
+;
+
+parameterizedObjectClassAssignment:
+    OBJECT_CLASS_REFERENCE parameterList ASSIGN objectClass
+;
+
+parameterizedObjectAssignment:
+    LCASE_ID parameterList definedObjectClass ASSIGN object
+;
+
+parameterizedObjectSetAssignment:
+    UCASE_ID parameterList definedObjectClass ASSIGN objectSet
+;
+
+parameterList:
+    LCURLY parameter (COMMA parameter)* RCURLY
+;
+
+parameter:
+    paramGovernor COLON dummyReference
+    | dummyReference
+;
+
+paramGovernor:
+    governor
+    | dummyGovernor
+;
+
+governor:
+    type
+    | definedObjectClass
+;
+
+dummyGovernor:
+    dummyReference
+;
+
+dummyReference:
+    REFERENCE
+;
 
 
 
@@ -1264,7 +1338,12 @@ OBJECT_CLASS_REFERENCE:
     ('A'..'Z') ('-'('A'..'Z'|'0'..'9')|('A'..'Z'|'0'..'9'))*
 ;
 
-
+/* Simplified definition of 'Reference' from ITU-T X.680 section 13.1 */
+REFERENCE:
+    UCASE_ID
+    | LCASE_ID
+    | OBJECT_CLASS_REFERENCE
+;
 
 
 
