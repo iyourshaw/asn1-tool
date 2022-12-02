@@ -51,6 +51,7 @@
                 <configuration>
                     <listener>true</listener>
                     <visitor>true</visitor>
+                    <libDirectory>${basedir}/src/main/antlr4/com/yafred/asn1/grammar</libDirectory>
                 </configuration>
             </plugin>  
         </plugins>
