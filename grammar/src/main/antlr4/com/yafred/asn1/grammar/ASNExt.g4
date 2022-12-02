@@ -44,7 +44,6 @@ builtinType:
     | TIME_OF_DAY_LITERAL // TimeOfDayType
 ;
 
-
 /*---------------------- Value Set --------------------------------------------------*/
 
 valueSetTypeAssignment:
@@ -53,6 +52,57 @@ valueSetTypeAssignment:
 
 valueSet:
     LCURLY elementSetSpec RCURLY
+;
+
+/*---------------------- Element Set ------------------------------------------------*/
+elementSetSpecs:
+    rootElementSetSpec
+    | rootElementSetSpec COMMA ELLIPSIS
+    | rootElementSetSpec COMMA ELLIPSIS COMMA additionalElementSetSpec
+;
+
+rootElementSetSpec:
+    elementSetSpec
+;
+
+additionalElementSetSpec:
+    elementSetSpec
+;
+
+/*--------------------- Table Constraints -------------------------------------------*/
+//  See ITU-T X.682 (02/2021), Constraint Specification
+
+generalContraint:
+//    userDefinedConstraint |
+    tableConstraint
+//    | contentsConstraint
+;
+
+tableConstraint:
+    simpleTableConstraint
+    | componentRelationConstraint
+;
+
+simpleTableConstraint:
+    objectSet
+;
+
+componentRelationConstraint:
+    LCURLY definedObjectSet RCURLY
+    LCURLY atNotation (COMMA atNotation)* RCURLY
+;
+
+atNotation:
+    AT componentIdList
+    | AT DOT level componentIdList
+;
+
+level:
+    (DOT level)?
+;
+
+componentIdList:
+    LCASE_ID (DOT LCASE_ID)*
 ;
 
 
@@ -92,10 +142,12 @@ usefulObjectClassReference:
 //    | abstractSyntax
 ;
 
+// TYPE-IDENTIFIER Information Object Class
+// Defined in ITU T-REC-X.681 (02/2021) Annex A
 typeIdentifier:
     CLASS_LITERAL
     LCURLY
-    '&id' OBJECT_LITERAL IDENTIFIER_LITERAL UNIQUE_LITERAL COMMA
+    '&id' UCASE_ID /* object identifier */ UNIQUE_LITERAL COMMA
     '&Type'
     RCURLY
     WITH_LITERAL SYNTAX_LITERAL LCURLY '&Type' IDENTIFIED_BY_LITERAL '&id' RCURLY
@@ -261,20 +313,20 @@ objectSet:
     LCURLY objectSetAssignment RCURLY
 ;
 
-//objectSetSpec:
-//    rootElementSetSpec
-//    | rootElementSetSpec COMMA ELLIPSIS
-//    | ELLIPSIS
-//    | ELLIPSIS COMMA additionalElementSetSpec
-//    | rootElementSetSpec COMMA ELLIPSIS COMMA additionalElementSetSpec
-//;
+objectSetSpec:
+    rootElementSetSpec
+    | rootElementSetSpec COMMA ELLIPSIS
+    | ELLIPSIS
+    | ELLIPSIS COMMA additionalElementSetSpec
+    | rootElementSetSpec COMMA ELLIPSIS COMMA additionalElementSetSpec
+;
 
-//objectSetElements:
-//    object
-//    | definedObjectSet
-//    | informationFromObjects
-////    | parameterizedObjectSet
-//;
+objectSetElements:
+    object
+    | definedObjectSet
+    | informationFromObjects
+    | parameterizedObjectSet
+;
 
 objectClassFieldType:
     definedObjectClass DOT fieldName
@@ -320,13 +372,13 @@ informationFromObjects:
 
 referencedObjects:
     definedObject
-//    | parameterizedObject
+    | parameterizedObject
     | definedObjectSet
-//    | parameterizedObjectSet
+    | parameterizedObjectSet
 ;
 
 instanceOfType:
-    INSTANCE_LITERAL OF_LITERAL definedObjectClass
+    INSTANCE_OF_LITERAL definedObjectClass
 ;
 
 //instanceOfValue:
@@ -334,31 +386,31 @@ instanceOfType:
 //;
 
 /*----------------------- Parameterization -------------------------------------------*/
-// See ITU-T X.693 (02/2021) Paramaterization of ASN.1 specifications
+// See ITU-T X.683 (02/2021) Paramaterization of ASN.1 specifications
 
 parameterizedAssignment:
-    parameterizedTypeAssignment
-    | parameterizedValueAssignment
-    | parameterizedObjectClassAssignment
-    | parameterizedObjectAssignment
+//    parameterizedTypeAssignment
+//    | parameterizedValueAssignment
+//    | parameterizedObjectClassAssignment |
+     parameterizedObjectAssignment
     | parameterizedObjectSetAssignment
 ;
 
-parameterizedTypeAssignment:
-    UCASE_ID parameterList ASSIGN type
-;
-
-parameterizedValueAssignment:
-    LCASE_ID parameterList type ASSIGN value
-;
-
-parameterizedValueSetTypeAssignment:
-    UCASE_ID parameterList type ASSIGN valueSet
-;
-
-parameterizedObjectClassAssignment:
-    OBJECT_CLASS_REFERENCE parameterList ASSIGN objectClass
-;
+//parameterizedTypeAssignment:
+//    UCASE_ID parameterList ASSIGN type
+//;
+//
+//parameterizedValueAssignment:
+//    LCASE_ID parameterList type ASSIGN value
+//;
+//
+//parameterizedValueSetTypeAssignment:
+//    UCASE_ID parameterList type ASSIGN valueSet
+//;
+//
+//parameterizedObjectClassAssignment:
+//    OBJECT_CLASS_REFERENCE parameterList ASSIGN objectClass
+//;
 
 parameterizedObjectAssignment:
     LCASE_ID parameterList definedObjectClass ASSIGN object
@@ -387,15 +439,36 @@ governor:
     | definedObjectClass
 ;
 
+
 dummyGovernor:
     dummyReference
 ;
 
+// DummyReference can represent a Type, Value, ValueSet, Object, or ObjectSet, See ITU X.683 (02/2021), Sec. 8
 dummyReference:
-    REFERENCE
+    UCASE_ID | LCASE_ID
 ;
 
+parameterizedObjectSet:
+    definedObjectSet actualParameterList
+;
 
+parameterizedObject:
+    definedObject actualParameterList
+;
+
+actualParameterList:
+    LCURLY actualParameter (COMMA actualParameter)* RCURLY
+;
+
+actualParameter:
+    type
+    | value
+    | valueSet
+    | definedObjectClass
+    | object
+    | objectSet
+;
 
 /*--------------------- LITERAL -----------------------------------------------------*/
 
@@ -427,10 +500,18 @@ INSTANCE_LITERAL:
     'INSTANCE'
 ;
 
+INSTANCE_OF_LITERAL:
+    INSTANCE_LITERAL OF_LITERAL
+;
+
 /*--------------------- Lexical Items -----------------------------------------------*/
 
 AMPERSAND:
     '&'
+;
+
+AT:
+    '@'
 ;
 
 /* objectclassreference ITU-T X.681 (02/2021), like typereference with no lower case letters */
