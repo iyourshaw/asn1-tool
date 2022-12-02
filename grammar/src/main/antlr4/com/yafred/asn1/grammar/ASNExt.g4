@@ -44,6 +44,20 @@ builtinType:
     | TIME_OF_DAY_LITERAL // TimeOfDayType
 ;
 
+/* ReferencedType (see 17.3 in ITU-T X.680 (08/2015) */
+referencedType:
+    usefulType
+    | definedType
+    | selectionType
+    | informationFromObjects
+;
+
+elements:
+    subtypeElements
+    | objectSetElements     // Included to support information object classes
+    | LPAREN elementSetSpec RPAREN
+;
+
 /*---------------------- Value Set --------------------------------------------------*/
 
 valueSetTypeAssignment:
@@ -54,20 +68,11 @@ valueSet:
     LCURLY elementSetSpec RCURLY
 ;
 
-/*---------------------- Element Set ------------------------------------------------*/
-elementSetSpecs:
-    rootElementSetSpec
-    | rootElementSetSpec COMMA ELLIPSIS
-    | rootElementSetSpec COMMA ELLIPSIS COMMA additionalElementSetSpec
-;
 
-rootElementSetSpec:
-    elementSetSpec
-;
 
-additionalElementSetSpec:
-    elementSetSpec
-;
+
+
+
 
 /*--------------------- Table Constraints -------------------------------------------*/
 //  See ITU-T X.682 (02/2021), Constraint Specification
@@ -110,9 +115,9 @@ componentIdList:
 /*--------------------- Object Classes ----------------------------------------------*/
 
 definedObjectClass:
-    externalObjectClassReference
-    | OBJECT_CLASS_REFERENCE
-    | usefulObjectClassReference
+    externalObjectClassReference |
+    OBJECT_CLASS_REFERENCE |
+    usefulObjectClassReference
 ;
 
 definedObject:
@@ -147,10 +152,10 @@ usefulObjectClassReference:
 typeIdentifier:
     CLASS_LITERAL
     LCURLY
-    '&id' UCASE_ID /* object identifier */ UNIQUE_LITERAL COMMA
-    '&Type'
+    AMPERSAND 'id' UCASE_ID /* object identifier */ UNIQUE_LITERAL COMMA
+    AMPERSAND 'Type'
     RCURLY
-    WITH_LITERAL SYNTAX_LITERAL LCURLY '&Type' IDENTIFIED_BY_LITERAL '&id' RCURLY
+    WITH_LITERAL SYNTAX_LITERAL LCURLY AMPERSAND 'Type' IDENTIFIED_BY_LITERAL AMPERSAND 'id' RCURLY
 ;
 
 
@@ -270,12 +275,12 @@ object:
     definedObject
     | objectDefn
     | informationFromObjects
-//    | parameterizedObject
+    | parameterizedObject
 ;
 
 objectDefn:
-    defaultSyntax
-    | definedSyntax
+    defaultSyntax |
+    definedSyntax
 ;
 
 
@@ -310,16 +315,19 @@ objectSetAssignment:
 ;
 
 objectSet:
-    LCURLY objectSetAssignment RCURLY
+    LCURLY objectSetSpec RCURLY
 ;
 
 objectSetSpec:
-    rootElementSetSpec
-    | rootElementSetSpec COMMA ELLIPSIS
+    elementSetSpec /* rootElementSetSpec */
+    | elementSetSpec /* rootElementSetSpec */ COMMA ELLIPSIS
     | ELLIPSIS
-    | ELLIPSIS COMMA additionalElementSetSpec
-    | rootElementSetSpec COMMA ELLIPSIS COMMA additionalElementSetSpec
+    | ELLIPSIS COMMA elementSetSpec /* additionalElementSetSpec */
+    | elementSetSpec /* rootElementSetSpec */ COMMA ELLIPSIS COMMA elementSetSpec /* additionalElementSetSpec */
 ;
+
+
+
 
 objectSetElements:
     object
