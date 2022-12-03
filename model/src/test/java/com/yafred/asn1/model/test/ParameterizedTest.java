@@ -46,6 +46,8 @@ import org.reflections.scanners.ResourcesScanner;
 
 import com.yafred.asn1.grammar.ASNLexer;
 import com.yafred.asn1.grammar.ASNParser;
+import com.yafred.asn1.grammar.ASNExtLexer;
+import com.yafred.asn1.grammar.ASNExtParser;
 import com.yafred.asn1.model.Specification;
 import com.yafred.asn1.parser.Asn1TypeLabeller;
 import com.yafred.asn1.parser.Asn1ModelValidator;
@@ -147,5 +149,11 @@ public class ParameterizedTest {
 	    s.close();
 	    return ret;
 	}
+
+
+
+
+
+
 
 }

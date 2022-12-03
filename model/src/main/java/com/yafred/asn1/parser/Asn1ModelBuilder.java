@@ -23,13 +23,14 @@ package com.yafred.asn1.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.yafred.asn1.grammar.ASNLexer;
+import com.yafred.asn1.grammar.ASNParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import com.yafred.asn1.grammar.ASNLexer;
-import com.yafred.asn1.grammar.ASNParser;
 import com.yafred.asn1.model.Specification;
 
 public class Asn1ModelBuilder {
